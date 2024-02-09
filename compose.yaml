@@ -1,0 +1,45 @@
+version: '3'
+volumes:
+  postgres-data:
+networks:
+  app-network:
+services:
+  app1:
+    container_name: fetch_user_app
+    build: 
+      dockerfile: ./build/Dockerfile
+      context: .
+    ports: 
+      - "8000:3000"
+    networks:
+      - app-network
+    depends_on:
+      - db
+      - jaeger-trace
+    environment:
+      - DB_CONN_STRING=user=myuser password=mypass host=db port=5432 dbname=telmetry sslmode=disable pool_max_conns=10
+      - EXPORTER_ENDPOINT=jaeger-trace:4318
+      - EXPORTER_PATH=/v1/traces 
+  db:
+    container_name: "cluster_db"
+    image: "postgres:15"
+    volumes:
+      - ./local/init.sql:/docker-entrypoint-initdb.d/db.sql
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    ports:
+      - "6000:5432"
+    environment:
+      - POSTGRES_PASSWORD=password
+  jaeger-trace:
+    image:   jaegertracing/all-in-one:1
+    container_name: jaeger
+    ports:
+      - "5000:16686"
+      - "14268:14268"
+      - "4318:4318"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - app-network
