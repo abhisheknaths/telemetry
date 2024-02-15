@@ -21,3 +21,12 @@ func LoadInstrumentationConfig() (InstrumentationConfig, error) {
 	}
 	return i, err
 }
+
+func LoadUserDetailConfig() (UserDetailConfig, error) {
+	ud := UserDetailConfig{}
+	err := envconfig.Process("", &ud)
+	if err != nil {
+		return ud, err
+	}
+	return ud, err
+}

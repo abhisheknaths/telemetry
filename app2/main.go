@@ -13,7 +13,7 @@ import (
 
 var version string
 
-const serviceName string = "fetch-user-service"
+const serviceName string = "fetch-user-detail-service"
 
 func main() {
 	ctx := context.Background()
@@ -35,12 +35,6 @@ func main() {
 		panic(err)
 	}
 
-	udConfig, err := config.LoadUserDetailConfig()
-	if err != nil {
-		fmt.Println("failed to read user detail config")
-		panic(err)
-	}
-
 	tp := instrumentation.NewTracerProvider(traceExporter, serviceName)
 	instrumentation.SetTraceProviderGlobally(tp)
 
@@ -51,16 +45,10 @@ func main() {
 	}
 
 	rd := router.RouterDeps{
-		Database:      db,
-		Version:       version,
-		TraceProvider: tp,
+		Database: db,
+		Version:  version,
 	}
-
-	ed := router.RouterDepsWithExternalDeps{
-		RouterDeps:  rd,
-		ExternalURL: udConfig.UserDetailEndpoint,
-	}
-	r := router.InitRouter(ed)
+	r := router.InitDetailRouter(rd)
 	fmt.Println("listening on 3000")
 	http.ListenAndServe(":3000", r)
 }

@@ -19,6 +19,23 @@ services:
     environment:
       - DB_CONN_STRING=user=myuser password=mypass host=db port=5432 dbname=telmetry sslmode=disable pool_max_conns=10
       - EXPORTER_ENDPOINT=jaeger-trace:4318
+      - EXPORTER_PATH=/v1/traces
+      - USER_DETAIL_ENDPOINT=http://app2:3000/user/detail
+  app2:
+    container_name: fetch_user_app_detail
+    build: 
+      dockerfile: ./build/DockerfileDetail
+      context: .
+    ports: 
+      - "9000:3000"
+    networks:
+      - app-network
+    depends_on:
+      - db
+      - jaeger-trace
+    environment:
+      - DB_CONN_STRING=user=myuser password=mypass host=db port=5432 dbname=telmetry sslmode=disable pool_max_conns=10
+      - EXPORTER_ENDPOINT=jaeger-trace:4318
       - EXPORTER_PATH=/v1/traces 
   db:
     container_name: "cluster_db"

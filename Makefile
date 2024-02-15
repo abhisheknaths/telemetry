@@ -1,10 +1,13 @@
-SOURCES := $(wildcard *.go)
-VERSION=$(shell git describe --tags --long --dirty 2>/dev/null)
+NAME := $(shell basename $(CURDIR))
+.PHONY: build
+build: 
+	docker compose build
 
-## we must have tagged the repo at least for the version to work
-ifeq ($(VERSION),)
-	VERSION = UNKNOWN
-endif
+.PHONY: serve
+serve: build
+	@echo "Starting ${NAME}"
+	docker compose up -d
 
-build: $(sources) build/Dockerfile
-	docker build -t telemetry:latest . -f build/Dockerfile --build-arg VERSION=$(VERSION)
+.PHONY: down
+down:
+	docker compose down

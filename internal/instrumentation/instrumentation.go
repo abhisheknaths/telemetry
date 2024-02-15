@@ -2,6 +2,7 @@ package instrumentation
 
 import (
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
@@ -27,5 +28,6 @@ func NewTracerProvider(exp SpanExporter, serviceName string) TracerProvider {
 }
 
 func SetTraceProviderGlobally(tp TracerProvider) {
+	otel.SetTextMapPropagator(propagation.TraceContext{})
 	otel.SetTracerProvider(tp)
 }
